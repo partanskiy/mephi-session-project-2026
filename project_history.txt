@@ -1,0 +1,165 @@
+    1  2026-04-14 08:11:18 cat /etc/profile.d/mephi-history.sh
+    2  2026-04-14 08:11:24 nvim /etc/profile.d/mephi-history.sh
+    3  2026-04-14 08:11:28 vi /etc/profile.d/mephi-history.sh
+    4  2026-04-14 08:11:47 sudo vi /etc/profile.d/mephi-history.sh
+    5  2026-04-14 08:12:05 . /etc/profile.d/mephi-history.sh
+    6  2026-04-14 08:12:17 sudo hostnamectl set-hostname mephi-2026.domain.local
+    7  2026-04-14 08:12:23 hostnamectl | grep -E 'Static hostname|Transient'
+    8  2026-04-14 08:12:32 cat /etc/hostname
+    9  2026-04-14 08:12:42 echo dummy | sudo tee /etc/modules-load.d/dummy.conf
+   10  2026-04-14 08:14:23 sudo nmcli connection add type dummy con-name mephi0 ifname mephi0 ipv4.method manual ipv4.addresses "192.168.1.100/24,192.168.1.1/32" ipv4.gateway 192.168.1.1 ipv4.dns 8.8.8.8 ipv4.never-default yes ipv4.route-metric 9999 ipv6.method disabled connection.autoconnect yes
+   11  2026-04-14 08:14:33 sudo nmcli connection up mephi0
+   12  2026-04-14 08:14:43 nmcli -p connection show mephi0 | grep -E 'ipv4\.(method|addresses|gateway|dns|never-default|route-metric)|connection\.autoconnect|interface-name'
+   13  2026-04-14 08:14:53 ip -brief addr show dev mephi0
+   14  2026-04-14 08:15:00 ip -brief addr show dev ens18
+   15  2026-04-14 08:15:07 ip route
+   16  2026-04-14 08:15:16 ping -c 4 8.8.8.8 > /tmp/network_check.txt
+   17  2026-04-14 08:15:27 ping -c 4 192.168.1.1 >> /tmp/network_check.txt
+   18  2026-04-14 08:15:35 cat /tmp/network_check.txt
+   19  2026-04-14 08:15:45 history -a
+   20  2026-04-14 08:17:49 sudo dnf install -y nginx tcpdump libcap-ng-utils policycoreutils-python-utils
+   21  2026-04-14 08:18:32 rpm -q nginx tcpdump libcap-ng-utils policycoreutils-python-utils
+   22  2026-04-14 08:18:46 command -v nginx tcpdump getcap setcap semanage restorecon
+   23  2026-04-14 08:19:00 sudo dnf download tcpdump --destdir=/tmp
+   24  2026-04-14 08:19:26 ls -la /tmp/tcpdump-*.rpm
+   25  2026-04-14 08:20:01 sudo rpm -Uvh --replacepkgs /tmp/tcpdump-4.99.6-2.fc43.x86_64.rpm
+   26  2026-04-14 08:20:14 rpm -qi tcpdump | head -12
+   27  2026-04-14 08:20:39 sha256sum /tmp/tcpdump-4.99.6-2.fc43.x86_64.rpm
+   28  2026-04-14 08:21:24 history -a
+   29  2026-04-14 08:23:42 sudo mkdir -p /var/lib/mephi
+   30  2026-04-14 08:23:51 sudo truncate -s 2G /var/lib/mephi/sdb.img
+   31  2026-04-14 08:23:57 ls -la /var/lib/mephi/sdb.img
+   32  2026-04-14 08:24:21 sudo tee /etc/systemd/system/mephi-sdb.service >/dev/null <<'EOF'
+   33  2026-04-14 09:15:50 [Unit]
+   34  2026-04-14 09:15:50 Description=Attach MEPHI virtual disk (simulated /dev/sdb) at /dev/loop0
+   35  2026-04-14 09:15:50 DefaultDependencies=no
+   36  2026-04-14 09:15:50 After=local-fs-pre.target
+   37  2026-04-14 09:15:50 Before=local-fs.target
+   38  2026-04-14 09:15:50 Conflicts=shutdown.target
+   39  2026-04-14 09:15:50 Before=shutdown.target
+   40  2026-04-14 09:15:50 [Service]
+   41  2026-04-14 09:15:50 Type=oneshot
+   42  2026-04-14 09:15:50 RemainAfterExit=yes
+   43  2026-04-14 09:15:50 ExecStartPre=/sbin/modprobe loop
+   44  2026-04-14 09:15:50 ExecStart=/usr/sbin/losetup -P /dev/loop0 /var/lib/mephi/sdb.img
+   45  2026-04-14 09:15:50 ExecStop=/usr/sbin/losetup -d /dev/loop0
+   46  2026-04-14 09:15:50 [Install]
+   47  2026-04-14 09:15:50 WantedBy=local-fs.target
+   48  2026-04-14 09:15:50 EOF
+   49  2026-04-14 08:27:20 sudo systemctl daemon-reload
+   50  2026-04-14 08:27:26 sudo systemctl enable --now mephi-sdb.service
+   51  2026-04-14 08:27:34 systemctl status mephi-sdb.service --no-pager | head -15
+   52  2026-04-14 08:27:48 losetup -l
+   53  2026-04-14 08:28:38 sudo parted -s /dev/loop0 mklabel gpt mkpart primary ext4 1MiB 100%
+   54  2026-04-14 08:28:57 sudo partprobe /dev/loop0
+   55  2026-04-14 08:29:33 [ ! -b /dev/loop0p1 ]
+   56  2026-04-14 08:31:54 ls -la /dev/loop0*
+   57  2026-04-14 08:32:02 sudo mkfs.ext4 -L MEPHI_DATA /dev/loop0p1
+   58  2026-04-14 08:32:11 sudo mkdir -p /data/mephi-web
+   59  2026-04-14 08:32:16 sudo cp -a /etc/fstab /etc/fstab.bak
+   60  2026-04-14 08:32:30 echo 'LABEL=MEPHI_DATA /data/mephi-web ext4 defaults,nofail,x-systemd.requires=mephi-sdb.service 0 2' | sudo tee -a /etc/fstab
+   61  2026-04-14 08:32:40 sudo systemctl daemon-reload
+   62  2026-04-14 08:32:45 sudo mount -a
+   63  2026-04-14 08:32:50 findmnt /data/mephi-web
+   64  2026-04-14 08:32:55 lsblk -f /dev/loop0
+   65  2026-04-14 08:33:01 tail -5 /etc/fstab
+   66  2026-04-14 08:33:06 sudo systemctl enable --now nginx
+   67  2026-04-14 08:33:12 systemctl is-enabled nginx
+   68  2026-04-14 08:33:16 systemctl is-active nginx
+   69  2026-04-14 08:33:30 curl -sS http://localhost/ -o /dev/null -w "HTTP %{http_code}\n"
+   70  2026-04-14 08:33:48 sudo journalctl -u nginx --since "5 minutes ago" > /tmp/nginx_recent_logs.txt
+   71  2026-04-14 08:33:55 wc -l /tmp/nginx_recent_logs.txt
+   72  2026-04-14 08:34:02 head -40 /tmp/nginx_recent_logs.txt
+   73  2026-04-14 08:34:11 history -a
+   74  2026-04-14 08:41:28 sudo groupadd mephi-devs
+   75  2026-04-14 08:41:41 sudo useradd -m -G mephi-devs mephi-admin
+   76  2026-04-14 08:42:06 passwd mephi-admin
+   77  2026-04-14 08:42:13 sudo chown mephi-admin:mephi-devs /data/mephi-web
+   78  2026-04-14 08:42:20 sudo chmod 2775 /data/mephi-web
+   79  2026-04-14 08:42:29 id mephi-admin
+   80  2026-04-14 08:42:36 getent group mephi-devs
+   81  2026-04-14 08:42:41 stat /data/mephi-web
+   82  2026-04-14 08:42:48 ls -ld /data/mephi-web
+   83  2026-04-14 08:42:53 getenforce
+   84  2026-04-14 08:43:00 sudo semanage fcontext -a -t httpd_sys_content_t '/data/mephi-web(/.*)?'
+   85  2026-04-14 08:43:07 sudo restorecon -Rv /data/mephi-web
+   86  2026-04-14 08:43:13 ls -ldZ /data/mephi-web
+   87  2026-04-14 08:43:21 sudo chmod u-s /usr/sbin/tcpdump
+   88  2026-04-14 08:43:26 sudo setcap cap_net_raw,cap_net_admin+ep /usr/sbin/tcpdump
+   89  2026-04-14 08:43:33 getcap /usr/sbin/tcpdump
+   90  2026-04-14 08:43:41 ls -l /usr/sbin/tcpdump
+   91  2026-04-14 08:44:02 sudo -u mephi-admin tcpdump --help
+   92  2026-04-14 08:44:09 history -a
+   93  2026-04-14 08:45:59 sudo passwd -S mephi-admin
+   94  2026-04-14 08:46:16 su - mephi-admin -c 'whoami && id'
+   95  2026-04-14 08:50:52 sudo passwd -S root
+   96  2026-04-14 08:51:12 vi /etc/ssh/sshd_config
+   97  2026-04-14 08:51:19 sudo cat /etc/ssh/sshd_config
+   98  2026-04-14 08:51:35 sudo grep -E '^(PermitRootLogin|PasswordAuthentication)' /etc/ssh/sshd_config
+   99  2026-04-14 08:52:10 echo 'root' | sudo tee /etc/ssh/denied_users
+  100  2026-04-14 08:52:19 sudo cat /etc/ssh/denied_users
+  101  2026-04-14 08:52:27 sudo chmod 644 /etc/ssh/denied_users
+  102  2026-04-14 08:52:37 sudo cp /etc/pam.d/sshd /etc/pam.d/sshd.bak
+  103  2026-04-14 08:52:47 sudo cp /etc/pam.d/login /etc/pam.d/login.bak
+  104  2026-04-14 08:55:50 sudo vi /etc/pam.d/sshd
+  105  2026-04-14 08:57:12 cat /etc/pam.d/sshd | head -n 2
+  106  2026-04-14 08:57:26 sudo vi /etc/pam.d/login
+  107  2026-04-14 08:58:17 cat /etc/pam.d/login | head -n 2
+  108  2026-04-14 08:58:25 sudo sshd -t
+  109  2026-04-14 08:58:30 sudo systemctl reload sshd
+  110  2026-04-14 09:01:55 sudo grep 'PermitRootLogin' /etc/ssh/sshd_config
+  111  2026-04-14 09:02:10 sudo cp -a /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+  112  2026-04-14 09:02:22 sudo vi /etc/ssh/sshd_config
+  113  2026-04-14 09:03:13 sudo grep 'PermitRootLogin' /etc/ssh/sshd_config
+  114  2026-04-14 09:03:22 sudo sshd -t
+  115  2026-04-14 09:03:29 sudo systemctl reload sshd
+  116  2026-04-14 09:04:50 sudo su - mephi-admin
+  117  2026-04-14 09:07:24 sudo cp -a /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+  118  2026-04-14 09:07:37 sudo vi /etc/nginx/nginx.conf
+  119  2026-04-14 09:10:36 sudo nginx -t
+  120  2026-04-14 09:10:45 sudo systemctl reload nginx
+  121  2026-04-14 09:10:51 grep -n 'root ' /etc/nginx/nginx.conf
+  122  2026-04-14 09:11:01 curl -sS http://localhost/
+  123  2026-04-14 09:11:20 curl -sS http://192.168.1.100/
+  124  2026-04-14 09:11:28 curl -sS http://localhost/ > /tmp/curl_output.txt
+  125  2026-04-14 09:11:40 cat /tmp/curl_output.txt
+  126  2026-04-14 09:11:46 history -a
+  127  2026-04-14 09:13:53 findmnt /tmp
+  128  2026-04-14 09:14:00 cp /tmp/tcpdump-*.rpm ~/
+  129  2026-04-14 09:14:04 ls -la ~/tcpdump-*.rpm
+  130  2026-04-14 09:14:10 history -a
+  131  2026-04-14 09:15:50 ssh vsock%1
+  132  2026-04-14 09:16:17 hostnamectl | grep -E Static
+  133  2026-04-14 09:16:34 hostnamectl | grep -E Transient
+  134  2026-04-14 09:16:40 ip -brief addr show dev mephi0
+  135  2026-04-14 09:16:46 ip route
+  136  2026-04-14 09:16:54 findmnt /data/mephi-web
+  137  2026-04-14 09:17:00 systemctl is-active mephi-sdb nginx sshd
+  138  2026-04-14 09:17:07 systemctl is-enabled mephi-sdb nginx sshd
+  139  2026-04-14 09:17:14 getenforce
+  140  2026-04-14 09:17:20 getcap /usr/sbin/tcpdump
+  141  2026-04-14 09:17:26 ls -ldZ /data/mephi-web
+  142  2026-04-14 09:17:31 curl -sS http://localhost/
+  143  2026-04-14 09:17:37 curl -sS http://192.168.1.100/
+  144  2026-04-14 09:20:06 cd ~
+  145  2026-04-14 09:20:11 ping -c 4 192.168.1.1 > ~/network_check.txt
+  146  2026-04-14 09:20:19 ping -c 4 8.8.8.8 >> ~/network_check.txt
+  147  2026-04-14 09:20:26 sudo journalctl -u nginx --since "5 minutes ago" > ~/nginx_recent_logs.txt
+  148  2026-04-14 09:20:37 cp /etc/fstab ~/fstab.txt
+  149  2026-04-14 09:20:42 getenforce > ~/selinux_status.txt
+  150  2026-04-14 09:20:47 ls -Zd /data/mephi-web > ~/file_contexts.txt
+  151  2026-04-14 09:20:52 getcap /usr/sbin/tcpdump > ~/tcpdump_capabilities.txt
+  152  2026-04-14 09:20:58 stat /data/mephi-web > ~/permissions.txt
+  153  2026-04-14 09:21:03 id mephi-admin > ~/users_groups.txt
+  154  2026-04-14 09:21:09 getent group mephi-devs >> ~/users_groups.txt
+  155  2026-04-14 09:21:15 curl -s http://192.168.1.100 > ~/curl_output.txt
+  156  2026-04-14 09:21:20 cp /data/mephi-web/index.html ~/index.html
+  157  2026-04-14 09:21:27 history > ~/project_history.txt
+  158  2026-04-14 09:21:33 ls -la ~/*.txt ~/*.html ~/tcpdump-*.rpm
+  159  2026-04-14 09:22:46 sudo systemctl reload nginx
+  160  2026-04-14 09:22:52 curl -sS http://localhost/ > /dev/null
+  161  2026-04-14 09:22:57 curl -sS http://192.168.1.100/ > /dev/null
+  162  2026-04-14 09:23:04 sudo journalctl -u nginx --since "5 minutes ago" > ~/nginx_recent_logs.txt
+  163  2026-04-14 09:23:09 wc -l ~/nginx_recent_logs.txt
+  164  2026-04-14 09:23:14 cat ~/nginx_recent_logs.txt
+  165  2026-04-14 09:23:20 history > ~/project_history.txt

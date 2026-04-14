@@ -1,0 +1,1 @@
+/usr/sbin/tcpdump cap_net_admin,cap_net_raw=ep
